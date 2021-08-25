@@ -1,6 +1,9 @@
 package repository
 
+import "github.com/jmoiron/sqlx"
+
 type Authorization interface {
+	CreateUser()
 }
 
 type NoteList interface {
@@ -15,6 +18,10 @@ type Repository struct {
 	NoteItem
 }
 
-func NewRepository() *Repository {
-	return &Repository{}
+func NewRepository(db *sqlx.DB) *Repository {
+	return &Repository{
+		Authorization: nil,
+		NoteList:      nil,
+		NoteItem:      nil,
+	}
 }
