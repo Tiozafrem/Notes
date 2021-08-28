@@ -1,9 +1,15 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"notes/model"
+	"notes/pkg/repository/postgres"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type Authorization interface {
-	CreateUser()
+	CreateUser(user model.User) (int, error)
+	GetUser(username, password string) (model.User, error)
 }
 
 type NoteList interface {
@@ -20,7 +26,7 @@ type Repository struct {
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Authorization: nil,
+		Authorization: postgres.NewAuthPostgres(db),
 		NoteList:      nil,
 		NoteItem:      nil,
 	}
