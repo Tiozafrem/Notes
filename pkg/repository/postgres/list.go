@@ -3,8 +3,10 @@ package postgres
 import (
 	"fmt"
 	"notes/model"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 )
 
 type NotesListPostgres struct {
@@ -72,8 +74,47 @@ func (repository *NotesListPostgres) GetListByIdUserId(userId, listId int) (mode
 	return list, err
 }
 func (repository *NotesListPostgres) UpdateListByIdUserId(userId, listId int, list model.UpdateListInput) error {
-	return nil
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argId := 1
+	if list.Title != nil {
+		setValues = append(setValues, fmt.Sprintf("title=$%d", argId))
+		args = append(args, *list.Title)
+		argId++
+	}
+
+	if list.Description != nil {
+		setValues = append(setValues, fmt.Sprintf("description=$%d", argId))
+		args = append(args, *list.Description)
+		argId++
+	}
+
+	setQuery := strings.Join(setValues, ", ")
+	query := fmt.Sprintf(
+		`UPDATE %s list_table
+		SET %s
+		FROM %s list_user_table
+		WHERE list_table.id = list_user_table.list_id AND
+			list_user_table.user_id=$%d AND
+			list_user_table.list_id=$%d`,
+		noteListTable, setQuery, usersListTable, argId, argId+1)
+
+	args = append(args, userId, listId)
+	logrus.Debugf("updateQuery: %s", query)
+	logrus.Debugf("args: %s", args)
+
+	_, err := repository.db.Exec(query, args...)
+
+	return err
 }
 func (repository *NotesListPostgres) DeleteListByIdUserId(userId, listId int) error {
-	return nil
+	query := fmt.Sprintf(`
+	DELETE FROM %s list_table
+	USING %s list_user_table
+	WHERE list_table.id = list_user_table.list_id AND
+		list_user_table.user_id=$1 AND
+		list_user_table.list_id=$2`,
+		noteListTable, usersListTable)
+	_, err := repository.db.Exec(query, userId, listId)
+	return err
 }
