@@ -13,6 +13,11 @@ type Authorization interface {
 }
 
 type NoteList interface {
+	CreateList(userId int, list model.NotesList) (int, error)
+	GetAllListUserId(userId int) ([]model.NotesList, error)
+	GetListByIdUserId(userId, listId int) (model.NotesList, error)
+	UpdateListByIdUserId(userId, listId int, list model.UpdateListInput) error
+	DeleteListByIdUserId(userId, listId int) error
 }
 
 type NoteItem interface {
@@ -27,5 +32,6 @@ type Usecases struct {
 func NewUsecases(repository *repository.Repository) *Usecases {
 	return &Usecases{
 		Authorization: auth.NewAuthUsecases(repository.Authorization),
+		NoteList:      NewNotesListUsecases(repository.NoteList),
 	}
 }
