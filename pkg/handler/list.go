@@ -22,7 +22,7 @@ func (handler *Handler) createList(c *gin.Context) {
 		return
 	}
 
-	id, err := handler.usecases.NoteList.CreateList(userId, input)
+	id, err := handler.usecases.NoteList.Create(userId, input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -44,7 +44,7 @@ func (handler *Handler) getAllLists(c *gin.Context) {
 		return
 	}
 
-	lists, err := handler.usecases.NoteList.GetAllListUserId(userId)
+	lists, err := handler.usecases.NoteList.GetAllList(userId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -68,7 +68,7 @@ func (handler *Handler) getListById(c *gin.Context) {
 		return
 	}
 
-	list, err := handler.usecases.NoteList.GetListByIdUserId(userId, listId)
+	list, err := handler.usecases.NoteList.GetListById(userId, listId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -94,8 +94,8 @@ func (handler *Handler) updateList(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	if err := handler.usecases.NoteList.UpdateListByIdUserId(userId, listId, input); err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	if err := handler.usecases.NoteList.Update(userId, listId, input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 	c.JSON(http.StatusOK, statusResponse{"ok"})
@@ -114,7 +114,7 @@ func (handler *Handler) deleteList(c *gin.Context) {
 		return
 	}
 
-	if err := handler.usecases.NoteList.DeleteListByIdUserId(userId, listId); err != nil {
+	if err := handler.usecases.NoteList.Delete(userId, listId); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

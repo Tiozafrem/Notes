@@ -17,7 +17,7 @@ func NewNotesListPostgres(db *sqlx.DB) *NotesListPostgres {
 	return &NotesListPostgres{db: db}
 }
 
-func (repository *NotesListPostgres) CreateList(userId int, list model.NotesList) (int, error) {
+func (repository *NotesListPostgres) Create(userId int, list model.NotesList) (int, error) {
 	transaction, err := repository.db.Begin()
 	if err != nil {
 		return 0, err
@@ -25,7 +25,7 @@ func (repository *NotesListPostgres) CreateList(userId int, list model.NotesList
 	var listId int
 	createListQuery := fmt.Sprintf(
 		`INSERT INTO %s (title, description) VALUES ($1, $2) RETURNING id`,
-		noteListTable,
+		noteItemsTable,
 	)
 	row := transaction.QueryRow(createListQuery, list.Title, list.Description)
 	if err := row.Scan(&listId); err != nil {
@@ -35,7 +35,7 @@ func (repository *NotesListPostgres) CreateList(userId int, list model.NotesList
 
 	createUsersListQuery := fmt.Sprintf(
 		`INSERT INTO %s (user_id, list_id) VALUES ($1, $2)`,
-		usersListTable,
+		listsItemsTable,
 	)
 	_, err = transaction.Exec(createUsersListQuery, userId, listId)
 	if err != nil {
@@ -44,7 +44,7 @@ func (repository *NotesListPostgres) CreateList(userId int, list model.NotesList
 	}
 	return listId, transaction.Commit()
 }
-func (repository *NotesListPostgres) GetAllListUserId(userId int) ([]model.NotesList, error) {
+func (repository *NotesListPostgres) GetAll(userId int) ([]model.NotesList, error) {
 	var lists []model.NotesList
 
 	query := fmt.Sprintf(
@@ -58,7 +58,7 @@ func (repository *NotesListPostgres) GetAllListUserId(userId int) ([]model.Notes
 	err := repository.db.Select(&lists, query, userId)
 	return lists, err
 }
-func (repository *NotesListPostgres) GetListByIdUserId(userId, listId int) (model.NotesList, error) {
+func (repository *NotesListPostgres) GetListById(userId, listId int) (model.NotesList, error) {
 	var list model.NotesList
 
 	query := fmt.Sprintf(
@@ -73,7 +73,7 @@ func (repository *NotesListPostgres) GetListByIdUserId(userId, listId int) (mode
 	err := repository.db.Get(&list, query, userId, listId)
 	return list, err
 }
-func (repository *NotesListPostgres) UpdateListByIdUserId(userId, listId int, list model.UpdateListInput) error {
+func (repository *NotesListPostgres) Update(userId, listId int, list model.UpdateListInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argId := 1
@@ -107,7 +107,7 @@ func (repository *NotesListPostgres) UpdateListByIdUserId(userId, listId int, li
 
 	return err
 }
-func (repository *NotesListPostgres) DeleteListByIdUserId(userId, listId int) error {
+func (repository *NotesListPostgres) Delete(userId, listId int) error {
 	query := fmt.Sprintf(`
 	DELETE FROM %s list_table
 	USING %s list_user_table

@@ -13,14 +13,19 @@ type Authorization interface {
 }
 
 type NoteList interface {
-	CreateList(userId int, list model.NotesList) (int, error)
-	GetAllListUserId(userId int) ([]model.NotesList, error)
-	GetListByIdUserId(userId, listId int) (model.NotesList, error)
-	UpdateListByIdUserId(userId, listId int, list model.UpdateListInput) error
-	DeleteListByIdUserId(userId, listId int) error
+	Create(userId int, list model.NotesList) (int, error)
+	GetAll(userId int) ([]model.NotesList, error)
+	GetListById(userId, listId int) (model.NotesList, error)
+	Update(userId, listId int, list model.UpdateListInput) error
+	Delete(userId, listId int) error
 }
 
 type NoteItem interface {
+	Create(userId, listId int, item model.NoteItem) (int, error)
+	GetAll(userId, listId int) ([]model.NoteItem, error)
+	GetItemById(userId, itemId int) (model.NoteItem, error)
+	Delete(userId, itemId int) error
+	Update(userId, itemId int, item model.UpdateItemInput) error
 }
 
 type Repository struct {
@@ -33,6 +38,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorization: postgres.NewAuthPostgres(db),
 		NoteList:      postgres.NewNotesListPostgres(db),
-		NoteItem:      nil,
+		NoteItem:      postgres.NewNotesItemPostgres(db),
 	}
 }
