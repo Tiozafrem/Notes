@@ -34,10 +34,10 @@ type Usecases struct {
 	NoteItem
 }
 
-func NewUsecases(repository *repository.Repository) *Usecases {
+func NewUsecases(repositorys *repository.Repository) *Usecases {
 	return &Usecases{
-		Authorization: auth.NewAuthUsecases(repository.Authorization),
-		NoteList:      NewNotesListUsecases(repository.NoteList),
-		NoteItem:      NewNotesItemUsecases(repository.NoteItem, repository.NoteList),
+		Authorization: auth.NewAuthUsecases(repositorys.Authorization),
+		NoteList:      NewNotesListUsecases(repositorys.NoteList),
+		NoteItem:      NewNotesItemUsecases(repositorys.NoteItem, repositorys.NoteList),
 	}
 }

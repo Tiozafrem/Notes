@@ -36,13 +36,13 @@ func generatePasswordHas(password string) string {
 	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
 
-func (authUsecases *AuthUsecases) CreateUser(user model.User) (int, error) {
+func (u *AuthUsecases) CreateUser(user model.User) (int, error) {
 	user.Password = generatePasswordHas(user.Password)
-	return authUsecases.repository.CreateUser(user)
+	return u.repository.CreateUser(user)
 }
 
-func (authUsecases *AuthUsecases) GenerateToken(username, password string) (string, error) {
-	user, err := authUsecases.repository.GetUser(username, generatePasswordHas(password))
+func (u *AuthUsecases) GenerateToken(username, password string) (string, error) {
+	user, err := u.repository.GetUser(username, generatePasswordHas(password))
 	if err != nil {
 		return "", err
 	}
@@ -57,7 +57,7 @@ func (authUsecases *AuthUsecases) GenerateToken(username, password string) (stri
 	return token.SignedString([]byte(signingKey))
 }
 
-func (authUsecases *AuthUsecases) ParseTokenToUserId(accessToken string) (int, error) {
+func (u *AuthUsecases) ParseTokenToUserId(accessToken string) (int, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

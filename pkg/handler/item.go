@@ -8,7 +8,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (handler *Handler) getAllItems(c *gin.Context) {
+// @Summary Get Item list
+// @Security ApiKeyAuth
+// @Tags items
+// @Description get Item list
+// @Id get-item
+// @Accepr json
+// @Produce json
+// @Success 200 {object} model.NoteItem
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/lists/:id/items [get]
+func (h *Handler) getAllItems(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -21,7 +33,7 @@ func (handler *Handler) getAllItems(c *gin.Context) {
 		return
 	}
 
-	items, err := handler.usecases.NoteItem.GetAll(userId, listId)
+	items, err := h.usecases.NoteItem.GetAll(userId, listId)
 
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -38,7 +50,20 @@ func (handler *Handler) getAllItems(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
-func (handler *Handler) createItem(c *gin.Context) {
+// @Summary Create Item list
+// @Security ApiKeyAuth
+// @Tags items
+// @Description create Item list
+// @Id create-item
+// @Accepr json
+// @Produce json
+// @Param input body model.NoteItem true "list info"
+// @Success 200 {integer} integer 1
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/lists/:id/items [post]
+func (h *Handler) createItem(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -57,7 +82,7 @@ func (handler *Handler) createItem(c *gin.Context) {
 		return
 	}
 
-	itemId, err := handler.usecases.NoteItem.Create(userId, listId, item)
+	itemId, err := h.usecases.NoteItem.Create(userId, listId, item)
 
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -69,7 +94,19 @@ func (handler *Handler) createItem(c *gin.Context) {
 	})
 }
 
-func (handler *Handler) getItemById(c *gin.Context) {
+// @Summary Get Item By Id
+// @Security ApiKeyAuth
+// @Tags items
+// @Description get item by id
+// @ID get-item-by-id
+// @Accept json
+// @Produce json
+// @Success 200 {object} model.NoteItem
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Roter /api/items/:id [get]
+func (h *Handler) getItemById(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -82,7 +119,7 @@ func (handler *Handler) getItemById(c *gin.Context) {
 		return
 	}
 
-	item, err := handler.usecases.NoteItem.GetItemById(userId, itemId)
+	item, err := h.usecases.NoteItem.GetItemById(userId, itemId)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -91,7 +128,20 @@ func (handler *Handler) getItemById(c *gin.Context) {
 
 }
 
-func (handler *Handler) updateItem(c *gin.Context) {
+// @Summary Update Item by id
+// @Security ApiKeyAuth
+// @Tags items
+// @Description update Item by id
+// @Id update-item-by-id
+// @Accepr json
+// @Produce json
+// @Param input body model.UpdateItemInput true "list info"
+// @Success 200 {object} statusResponse
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/items/:id [put]
+func (h *Handler) updateItem(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -110,7 +160,7 @@ func (handler *Handler) updateItem(c *gin.Context) {
 		return
 	}
 
-	if err := handler.usecases.NoteItem.Update(userId, itemId, item); err != nil {
+	if err := h.usecases.NoteItem.Update(userId, itemId, item); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -120,7 +170,19 @@ func (handler *Handler) updateItem(c *gin.Context) {
 	})
 }
 
-func (handler *Handler) deleteItem(c *gin.Context) {
+// @Summary Delete Item By Id
+// @Security ApiKeyAuth
+// @Tags items
+// @Description delete items by id
+// @ID delete-items-by-id
+// @Accept json
+// @Produce json
+// @Success 200 {object} statusResponse
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Roter /api/items/:id [delete]
+func (h *Handler) deleteItem(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -133,7 +195,7 @@ func (handler *Handler) deleteItem(c *gin.Context) {
 		return
 	}
 
-	if err := handler.usecases.NoteItem.Delete(userId, itemId); err != nil {
+	if err := h.usecases.NoteItem.Delete(userId, itemId); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -13,7 +13,8 @@ const (
 	userCtx             = "userID"
 )
 
-func (handler *Handler) userIdentity(c *gin.Context) {
+// Set userID for context
+func (h *Handler) userIdentity(c *gin.Context) {
 	header := c.GetHeader(authorizationHeader)
 	if header == "" {
 		newErrorResponse(c, http.StatusUnauthorized, "empty auth header")
@@ -30,7 +31,7 @@ func (handler *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	userId, err := handler.usecases.Authorization.ParseTokenToUserId(headerParts[1])
+	userId, err := h.usecases.Authorization.ParseTokenToUserId(headerParts[1])
 
 	if err != nil {
 		newErrorResponse(c, http.StatusUnauthorized, err.Error())
@@ -41,6 +42,7 @@ func (handler *Handler) userIdentity(c *gin.Context) {
 
 }
 
+// Get userID from context
 func getUserId(c *gin.Context) (int, error) {
 	id, ok := c.Get(userCtx)
 

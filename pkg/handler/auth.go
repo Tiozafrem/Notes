@@ -7,11 +7,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Struct for parse json username and password
 type signInInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
+// @Summary SignUp
+// @Tags auth
+// @Description create account, registry
+// @ID registry
+// @Accept json
+// @Produce json
+// @Param input body model.User true "account info"
+// @Success 200 {integer} integer 1
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *gin.Context) {
 	var input model.User
 	if err := c.BindJSON(&input); err != nil {
@@ -29,6 +43,18 @@ func (h *Handler) signUp(c *gin.Context) {
 	})
 }
 
+// @Summary SignIn
+// @Tags auth
+// @Description login
+// @Id login
+// @Accept json
+// @Produce json
+// @Param input body signInInput true "credentials"
+// @Success 200 {string} string "token"
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /auth/sign-in [post]
 func (h *Handler) signIn(c *gin.Context) {
 	var input signInInput
 

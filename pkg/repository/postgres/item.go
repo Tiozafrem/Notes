@@ -16,8 +16,8 @@ func NewNotesItemPostgres(db *sqlx.DB) *NotesItemPostgres {
 	return &NotesItemPostgres{db: db}
 }
 
-func (repository *NotesItemPostgres) Create(userId, listId int, item model.NoteItem) (int, error) {
-	transanction, err := repository.db.Begin()
+func (r *NotesItemPostgres) Create(userId, listId int, item model.NoteItem) (int, error) {
+	transanction, err := r.db.Begin()
 	if err != nil {
 		return 0, err
 	}
@@ -45,7 +45,7 @@ func (repository *NotesItemPostgres) Create(userId, listId int, item model.NoteI
 	return itemId, transanction.Commit()
 }
 
-func (repository *NotesItemPostgres) GetAll(userId, listId int) ([]model.NoteItem, error) {
+func (r *NotesItemPostgres) GetAll(userId, listId int) ([]model.NoteItem, error) {
 	var items []model.NoteItem
 	query := fmt.Sprintf(
 		`SELECT item_table.id, item_table.title, item_table.description, item_table.done
@@ -57,13 +57,13 @@ func (repository *NotesItemPostgres) GetAll(userId, listId int) ([]model.NoteIte
 		WHERE list_user_table.user_id = $1 AND
 			list_item_table.list_id = $2`,
 		noteItemsTable, listsItemsTable, usersListTable)
-	if err := repository.db.Select(&items, query, userId, listId); err != nil {
+	if err := r.db.Select(&items, query, userId, listId); err != nil {
 		return nil, err
 	}
 	return items, nil
 }
 
-func (repository *NotesItemPostgres) GetItemById(userId, itemId int) (model.NoteItem, error) {
+func (r *NotesItemPostgres) GetItemById(userId, itemId int) (model.NoteItem, error) {
 	var item model.NoteItem
 	query := fmt.Sprintf(
 		`SELECT item_table.id, item_table.title, item_table.description, item_table.done 
@@ -75,13 +75,13 @@ func (repository *NotesItemPostgres) GetItemById(userId, itemId int) (model.Note
 		WHERE list_user_table.user_id = $1 AND
 			item_table.id = $2 `,
 		noteItemsTable, listsItemsTable, usersListTable)
-	if err := repository.db.Get(&item, query, userId, itemId); err != nil {
+	if err := r.db.Get(&item, query, userId, itemId); err != nil {
 		return item, err
 	}
 	return item, nil
 }
 
-func (repository *NotesItemPostgres) Delete(userId, itemId int) error {
+func (r *NotesItemPostgres) Delete(userId, itemId int) error {
 	query := fmt.Sprintf(
 		`DELETE FROM %s item_table
 		USING %s list_item_table, %s list_user_table
@@ -90,11 +90,11 @@ func (repository *NotesItemPostgres) Delete(userId, itemId int) error {
 			list_user_table.user_id = $1 AND
 			item_table.id = $2`,
 		noteItemsTable, listsItemsTable, usersListTable)
-	_, err := repository.db.Exec(query, userId, itemId)
+	_, err := r.db.Exec(query, userId, itemId)
 	return err
 }
 
-func (repository *NotesItemPostgres) Update(userId, itemId int, item model.UpdateItemInput) error {
+func (r *NotesItemPostgres) Update(userId, itemId int, item model.UpdateItemInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argId := 1
@@ -130,6 +130,6 @@ func (repository *NotesItemPostgres) Update(userId, itemId int, item model.Updat
 		noteItemsTable, setQuery, listsItemsTable, usersListTable,
 		argId, argId+1)
 	args = append(args, userId, itemId)
-	_, err := repository.db.Exec(query, args...)
+	_, err := r.db.Exec(query, args...)
 	return err
 }

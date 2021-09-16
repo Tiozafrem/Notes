@@ -15,6 +15,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+// @title Notes API
+// @version 1.0
+// @description Api server for Notes Application
+
+// @host localhost:80
+// @BasePath /
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 func main() {
 
 	if err := initConfig(); err != nil {
@@ -46,6 +57,7 @@ func main() {
 
 }
 
+// Init config from defaults pass
 func initConfig() error {
 	viper.AddConfigPath("../configs")
 	viper.SetConfigName("config")

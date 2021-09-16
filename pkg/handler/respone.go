@@ -5,10 +5,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Struct for json message about error
 type errorResponse struct {
 	Message string `json:"message"`
 }
 
+// Struct for json status
 type statusResponse struct {
 	Status string `json:"status"`
 }

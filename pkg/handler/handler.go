@@ -4,6 +4,11 @@ import (
 	"notes/pkg/usecases"
 
 	"github.com/gin-gonic/gin"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "notes/docs"
 )
 
 type Handler struct {
@@ -14,38 +19,41 @@ func NewHandler(usecases *usecases.Usecases) *Handler {
 	return &Handler{usecases: usecases}
 }
 
-func (handler *Handler) InitRoutes() *gin.Engine {
+// Add routes for app
+func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/sign-up", handler.signUp)
-		auth.POST("/sign-in", handler.signIn)
+		auth.POST("/sign-up", h.signUp)
+		auth.POST("/sign-in", h.signIn)
 	}
 
-	api := router.Group("/api", handler.userIdentity)
+	api := router.Group("/api", h.userIdentity)
 	{
 		lists := api.Group("/lists")
 		{
-			lists.GET("/", handler.getAllLists)
-			lists.POST("/", handler.createList)
-			lists.GET("/:id", handler.getListById)
-			lists.PUT("/:id", handler.updateList)
-			lists.DELETE("/:id", handler.deleteList)
+			lists.GET("/", h.getAllLists)
+			lists.POST("/", h.createList)
+			lists.GET("/:id", h.getListById)
+			lists.PUT("/:id", h.updateList)
+			lists.DELETE("/:id", h.deleteList)
 
 			items := lists.Group(":id/items")
 			{
-				items.GET("/", handler.getAllItems)
-				items.POST("/", handler.createItem)
+				items.GET("/", h.getAllItems)
+				items.POST("/", h.createItem)
 			}
 
 		}
 
 		items := api.Group("items")
 		{
-			items.GET("/:id", handler.getItemById)
-			items.PUT("/:id", handler.updateItem)
-			items.DELETE("/:id", handler.deleteItem)
+			items.GET("/:id", h.getItemById)
+			items.PUT("/:id", h.updateItem)
+			items.DELETE("/:id", h.deleteItem)
 		}
 
 	}

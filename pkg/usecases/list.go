@@ -13,21 +13,21 @@ func NewNotesListUsecases(repository repository.NoteList) *NotesListUsecases {
 	return &NotesListUsecases{repository: repository}
 }
 
-func (usecases *NotesListUsecases) Create(userId int, list model.NotesList) (int, error) {
-	return usecases.repository.Create(userId, list)
+func (u *NotesListUsecases) Create(userId int, list model.NotesList) (int, error) {
+	return u.repository.Create(userId, list)
 }
-func (usecases *NotesListUsecases) GetAllList(userId int) ([]model.NotesList, error) {
-	return usecases.repository.GetAll(userId)
+func (u *NotesListUsecases) GetAllList(userId int) ([]model.NotesList, error) {
+	return u.repository.GetAll(userId)
 }
-func (usecases *NotesListUsecases) GetListById(userId, listId int) (model.NotesList, error) {
-	return usecases.repository.GetListById(userId, listId)
+func (u *NotesListUsecases) GetListById(userId, listId int) (model.NotesList, error) {
+	return u.repository.GetListById(userId, listId)
 }
-func (usecases *NotesListUsecases) Update(userId, listId int, list model.UpdateListInput) error {
+func (u *NotesListUsecases) Update(userId, listId int, list model.UpdateListInput) error {
 	if err := list.Validate(); err != nil {
 		return err
 	}
-	return usecases.repository.Update(userId, listId, list)
+	return u.repository.Update(userId, listId, list)
 }
-func (usecases *NotesListUsecases) Delete(userId, listId int) error {
-	return usecases.repository.Delete(userId, listId)
+func (u *NotesListUsecases) Delete(userId, listId int) error {
+	return u.repository.Delete(userId, listId)
 }
