@@ -66,6 +66,7 @@ func (h *Handler) signIn(c *gin.Context) {
 	token, err := h.usecases.Authorization.GenerateToken(input.Username, input.Password)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"token": token,

@@ -89,7 +89,7 @@ definitions:
     - password
     - username
     type: object
-host: localhost:80
+host: localhost:8080
 info:
   contact: {}
   description: Api server for Notes Application

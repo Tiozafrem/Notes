@@ -1,9 +1,11 @@
 package auth
 
 import (
+	"crypto/rand"
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"math/big"
 	"notes/model"
 	"notes/pkg/repository"
 	"time"
@@ -12,7 +14,6 @@ import (
 )
 
 const (
-	salt       = "lkjahsdoi12389jhnduoi37asd"
 	signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
 	tokenTTL   = 12 * time.Hour
 )
@@ -30,21 +31,41 @@ func NewAuthUsecases(repository repository.Authorization) *AuthUsecases {
 	return &AuthUsecases{repository: repository}
 }
 
-func generatePasswordHas(password string) string {
+func generatePasswordHash(password, salt string) string {
 	hash := sha1.New()
 	hash.Write([]byte(password))
 	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
 
+func generatePasswordSalt() string {
+	number, err := rand.Int(rand.Reader, big.NewInt(8))
+	if err != nil {
+		return ""
+	}
+	length := number.Int64() + 18
+	buff := make([]byte, length)
+	_, err = rand.Read(buff)
+	if err != nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%x", buff)[:length]
+}
+
 func (u *AuthUsecases) CreateUser(user model.User) (int, error) {
-	user.Password = generatePasswordHas(user.Password)
+	user.Salt = generatePasswordSalt()
+	user.Password = generatePasswordHash(user.Password, user.Salt)
+
 	return u.repository.CreateUser(user)
 }
 
 func (u *AuthUsecases) GenerateToken(username, password string) (string, error) {
-	user, err := u.repository.GetUser(username, generatePasswordHas(password))
+	user, err := u.repository.GetUser(username)
 	if err != nil {
 		return "", err
+	}
+	if user.Password != generatePasswordHash(password, user.Salt) {
+		return "", errors.New("password or login incoret")
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
