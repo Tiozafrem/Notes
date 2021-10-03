@@ -12,6 +12,13 @@ definitions:
           $ref: '#/definitions/model.NotesList'
         type: array
     type: object
+  handler.refreshInput:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
   handler.signInInput:
     properties:
       password:
@@ -25,6 +32,13 @@ definitions:
   handler.statusResponse:
     properties:
       status:
+        type: string
+    type: object
+  handler.tokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
         type: string
     type: object
   model.ListItem:
@@ -89,7 +103,7 @@ definitions:
     - password
     - username
     type: object
-host: localhost:80
+host: localhost:8080
 info:
   contact: {}
   description: Api server for Notes Application
@@ -316,6 +330,45 @@ paths:
       summary: Create Item list
       tags:
       - items
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: refresh token
+      operationId: refresh
+      parameters:
+      - description: credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.refreshInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token
+          schema:
+            $ref: '#/definitions/handler.tokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Refresh
+      tags:
+      - auth
   /auth/sign-in:
     post:
       consumes:
@@ -335,7 +388,7 @@ paths:
         "200":
           description: token
           schema:
-            type: string
+            $ref: '#/definitions/handler.tokenResponse'
         "400":
           description: Bad Request
           schema:

@@ -19,7 +19,7 @@ import (
 // @version 1.0
 // @description Api server for Notes Application
 
-// @host localhost:80
+// @host localhost:8080
 // @BasePath /
 
 // @securityDefinitions.apikey ApiKeyAuth

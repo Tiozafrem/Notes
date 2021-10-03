@@ -13,6 +13,17 @@ type signInInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// Struct for output tokens and binding in json
+type tokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+// Struct for input refresh and binding out json
+type refreshInput struct {
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
 // @Summary SignUp
 // @Tags auth
 // @Description create account, registry
@@ -50,7 +61,7 @@ func (h *Handler) signUp(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param input body signInInput true "credentials"
-// @Success 200 {string} string "token"
+// @Success 200 {object} tokenResponse "token"
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
@@ -63,11 +74,42 @@ func (h *Handler) signIn(c *gin.Context) {
 		return
 	}
 
-	token, err := h.usecases.Authorization.GenerateToken(input.Username, input.Password)
+	token, err := h.usecases.Authorization.GenerateToken(input.Username, input.Password, c.ClientIP())
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"token": token,
+	c.JSON(http.StatusOK, tokenResponse{
+		AccessToken:  token.AccessToken,
+		RefreshToken: token.RefreshToken,
 	})
+}
+
+// @Summary Refresh
+// @Tags auth
+// @Description refresh token
+// @Id refresh
+// @Accept json
+// @Produce json
+// @Param input body refreshInput true "credentials"
+// @Success 200 {object} tokenResponse "token"
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /auth/refresh [post]
+func (h *Handler) refreshToken(c *gin.Context) {
+	var input refreshInput
+
+	if err := c.BindJSON(&input); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	tokenResponse, err := h.usecases.Authorization.RefreshToken(input.RefreshToken)
+	if err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, tokenResponse)
 }
