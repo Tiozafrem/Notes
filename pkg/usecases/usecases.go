@@ -8,8 +8,11 @@ import (
 
 type Authorization interface {
 	CreateUser(user model.User) (int, error)
-	GenerateToken(username, password string) (string, error)
+	GenerateToken(username, password, nameDevice string) (auth.Tokens, error)
 	ParseTokenToUserId(toen string) (int, error)
+	RefreshToken(refresh_token string) (auth.Tokens, error)
+	NewRefreshToken() (string, error)
+	NewAccessToken(deviceId int) (string, error)
 }
 
 type NoteList interface {

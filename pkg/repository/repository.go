@@ -10,6 +10,11 @@ import (
 type Authorization interface {
 	CreateUser(user model.User) (int, error)
 	GetUser(username, password string) (model.User, error)
+	GetUserByDeviceId(deviceId int) (model.User, error)
+	GetDeviceByRefreshToken(refreshToken string) (model.DeviceUser, error)
+	CreateDevice(deviceUser model.DeviceUser) (int, error)
+	DeleteDeviceByDeviceId(deviceId int) error
+	UpdateRefreshTokenByDevice(deviceUser model.DeviceUser) error
 }
 
 type NoteList interface {

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/rand"
 	"crypto/sha1"
 	"errors"
 	"fmt"
@@ -12,9 +13,10 @@ import (
 )
 
 const (
-	salt       = "lkjahsdoi12389jhnduoi37asd"
-	signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
-	tokenTTL   = 12 * time.Hour
+	salt            = "lkjahsdoi12389jhnduoi37asd"
+	signingKey      = "qrkjk#4#%35FSFJlja#4353KSFjH"
+	accessTokenTTL  = 12 * time.Hour
+	refreshTokenTTL = 720 * time.Hour
 )
 
 type AuthUsecases struct {
@@ -23,7 +25,12 @@ type AuthUsecases struct {
 
 type tokenClaims struct {
 	jwt.StandardClaims
-	UserId int `json:"user_id"`
+	DeviceId int `json:"device_id"`
+}
+
+type Tokens struct {
+	AccessToken  string
+	RefreshToken string
 }
 
 func NewAuthUsecases(repository repository.Authorization) *AuthUsecases {
@@ -41,23 +48,51 @@ func (u *AuthUsecases) CreateUser(user model.User) (int, error) {
 	return u.repository.CreateUser(user)
 }
 
-func (u *AuthUsecases) GenerateToken(username, password string) (string, error) {
-	user, err := u.repository.GetUser(username, generatePasswordHas(password))
-	if user.Id == 0 {
-		return "", errors.New("no valid username or password")
-	}
-	if err != nil {
-		return "", err
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
+func (u *AuthUsecases) NewAccessToken(deviceId int) (string, error) {
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(tokenTTL).Unix(),
+			ExpiresAt: time.Now().Add(accessTokenTTL).Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
-		user.Id,
+		deviceId,
 	})
 
-	return token.SignedString([]byte(signingKey))
+	return accessToken.SignedString([]byte(signingKey))
+}
+
+func (u *AuthUsecases) GenerateToken(username, password, nameDevice string) (Tokens, error) {
+	user, err := u.repository.GetUser(username, generatePasswordHas(password))
+	if user.Id == 0 {
+		return Tokens{}, errors.New("no valid username or password")
+	}
+
+	if err != nil {
+		return Tokens{}, err
+	}
+	var tokens Tokens
+
+	tokens.RefreshToken, err = u.NewRefreshToken()
+	if err != nil {
+		return Tokens{}, err
+	}
+
+	deviceId, err := u.repository.CreateDevice(model.DeviceUser{
+		Name:         nameDevice,
+		Description:  nameDevice,
+		UserId:       user.Id,
+		Expire:       time.Now().Add(refreshTokenTTL),
+		RefreshToken: tokens.RefreshToken,
+	})
+	if err != nil {
+		return Tokens{}, err
+	}
+
+	tokens.AccessToken, err = u.NewAccessToken(deviceId)
+	if err != nil {
+		return Tokens{}, err
+	}
+
+	return tokens, nil
 }
 
 func (u *AuthUsecases) ParseTokenToUserId(accessToken string) (int, error) {
@@ -72,12 +107,50 @@ func (u *AuthUsecases) ParseTokenToUserId(accessToken string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
 	claims, ok := token.Claims.(*tokenClaims)
 
 	if !ok {
-		return 0, errors.New("token claims are not of tupe *tokenClaims")
+		return 0, errors.New("token claims are not of type *tokenClaims")
+	}
+	user, err := (u.repository.GetUserByDeviceId(claims.DeviceId))
+	return user.Id, err
+}
+
+func (u *AuthUsecases) NewRefreshToken() (string, error) {
+	buf := make([]byte, 46)
+
+	if _, err := rand.Read(buf); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", buf)[:46], nil
+}
+
+func (u *AuthUsecases) RefreshToken(refreshToken string) (Tokens, error) {
+	deviceUser, err := u.repository.GetDeviceByRefreshToken(refreshToken)
+	if err != nil {
+		return Tokens{}, err
 	}
 
-	return claims.UserId, nil
+	if deviceUser.Expire.Before(time.Now()) {
+		if err := u.repository.DeleteDeviceByDeviceId(deviceUser.Id); err != nil {
+			return Tokens{}, err
+		}
+		return Tokens{}, errors.New("device expire")
+	}
+
+	deviceUser.RefreshToken, err = u.NewRefreshToken()
+	if err != nil {
+		return Tokens{}, err
+	}
+
+	deviceUser.Expire = time.Now().Add(refreshTokenTTL)
+
+	if err := u.repository.UpdateRefreshTokenByDevice(deviceUser); err != nil {
+		return Tokens{}, err
+	}
+
+	var tokens Tokens
+	tokens.RefreshToken = deviceUser.RefreshToken
+	tokens.AccessToken, err = u.NewAccessToken(deviceUser.Id)
+	return tokens, err
 }
