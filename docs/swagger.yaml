@@ -27,6 +27,22 @@ definitions:
       status:
         type: string
     type: object
+  model.ItemInput:
+    properties:
+      description:
+        type: string
+      done:
+        type: boolean
+      title:
+        type: string
+    type: object
+  model.ListInput:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    type: object
   model.ListItem:
     properties:
       id:
@@ -60,22 +76,6 @@ definitions:
     required:
     - title
     type: object
-  model.UpdateItemInput:
-    properties:
-      description:
-        type: string
-      done:
-        type: boolean
-      title:
-        type: string
-    type: object
-  model.UpdateListInput:
-    properties:
-      description:
-        type: string
-      title:
-        type: string
-    type: object
   model.User:
     properties:
       name:
@@ -96,17 +96,100 @@ info:
   title: Notes API
   version: "1.0"
 paths:
-  /api/items/:id:
+  /api/items/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete items by id
+      operationId: delete-items-by-id
+      parameters:
+      - description: Item id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Item By Id
+      tags:
+      - items
+    get:
+      consumes:
+      - application/json
+      description: get item by id
+      operationId: get-item-by-id
+      parameters:
+      - description: Item id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.NoteItem'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Item By Id
+      tags:
+      - items
     put:
       description: update Item by id
       operationId: update-item-by-id
       parameters:
+      - description: Item id
+        in: path
+        name: id
+        required: true
+        type: string
       - description: list info
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/model.UpdateItemInput'
+          $ref: '#/definitions/model.ItemInput'
       produces:
       - application/json
       responses:
@@ -178,7 +261,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/model.NotesList'
+          $ref: '#/definitions/model.ListInput'
       produces:
       - application/json
       responses:
@@ -207,17 +290,100 @@ paths:
       summary: Create Notes list
       tags:
       - lists
-  /api/lists/:id:
+  /api/lists/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete list by id
+      operationId: delete-list-by-id
+      parameters:
+      - description: List id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.statusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete List By Id
+      tags:
+      - lists
+    get:
+      consumes:
+      - application/json
+      description: get list by id
+      operationId: get-list-by-id
+      parameters:
+      - description: List id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ListItem'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get List By Id
+      tags:
+      - lists
     put:
       description: update Note list by id
       operationId: update-list-by-id
       parameters:
+      - description: List id
+        in: path
+        name: id
+        required: true
+        type: string
       - description: list info
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/model.UpdateListInput'
+          $ref: '#/definitions/model.ListInput'
       produces:
       - application/json
       responses:
@@ -246,10 +412,16 @@ paths:
       summary: Update Note list by id
       tags:
       - lists
-  /api/lists/:id/items:
+  /api/lists/{id}/items:
     get:
       description: get Item list
       operationId: get-item
+      parameters:
+      - description: List id
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -282,12 +454,17 @@ paths:
       description: create Item list
       operationId: create-item
       parameters:
+      - description: List id
+        in: path
+        name: id
+        required: true
+        type: string
       - description: list info
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/model.NoteItem'
+          $ref: '#/definitions/model.ItemInput'
       produces:
       - application/json
       responses:

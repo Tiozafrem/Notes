@@ -20,7 +20,7 @@ type getAllListResponse struct {
 // @Id create-list
 // @Accepr json
 // @Produce json
-// @Param input body model.NotesList true "list info"
+// @Param input body model.ListInput true "list info"
 // @Success 200 {integer} integer 1
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
@@ -85,14 +85,15 @@ func (h *Handler) getAllLists(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Tags lists
 // @Description get list by id
-// @ID get-list-by-id
+// @Id get-list-by-id
 // @Accept json
 // @Produce json
+// @Param id path string true "List id"
 // @Success 200 {object} model.ListItem
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Roter /api/lists/:id [get]
+// @Router /api/lists/{id} [get]
 func (h *Handler) getListById(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
@@ -121,12 +122,13 @@ func (h *Handler) getListById(c *gin.Context) {
 // @Id update-list-by-id
 // @Accepr json
 // @Produce json
-// @Param input body model.UpdateListInput true "list info"
+// @Param id path string true "List id"
+// @Param input body model.ListInput true "list info"
 // @Success 200 {object} statusResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Router /api/lists/:id [put]
+// @Router /api/lists/{id} [put]
 func (h *Handler) updateList(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
@@ -140,7 +142,7 @@ func (h *Handler) updateList(c *gin.Context) {
 		return
 	}
 
-	var input model.UpdateListInput
+	var input model.ListInput
 	if err := c.BindJSON(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -156,14 +158,15 @@ func (h *Handler) updateList(c *gin.Context) {
 // @Security ApiKeyAuth
 // @Tags lists
 // @Description delete list by id
-// @ID delete-list-by-id
+// @Id delete-list-by-id
 // @Accept json
 // @Produce json
+// @Param id path string true "List id"
 // @Success 200 {object} statusResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse
-// @Roter /api/lists/:id [delete]
+// @Router /api/lists/{id} [delete]
 func (h *Handler) deleteList(c *gin.Context) {
 	userId, err := getUserId(c)
 	if err != nil {
