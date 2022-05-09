@@ -43,6 +43,9 @@ func (u *AuthUsecases) CreateUser(user model.User) (int, error) {
 
 func (u *AuthUsecases) GenerateToken(username, password string) (string, error) {
 	user, err := u.repository.GetUser(username, generatePasswordHas(password))
+	if user.Id == 0 {
+		return "", errors.New("no valid username or password")
+	}
 	if err != nil {
 		return "", err
 	}

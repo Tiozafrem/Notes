@@ -73,7 +73,7 @@ func (r *NotesListPostgres) GetListById(userId, listId int) (model.NotesList, er
 	err := r.db.Get(&list, query, userId, listId)
 	return list, err
 }
-func (r *NotesListPostgres) Update(userId, listId int, list model.UpdateListInput) error {
+func (r *NotesListPostgres) Update(userId, listId int, list model.ListInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argId := 1
