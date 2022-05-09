@@ -25,7 +25,7 @@ func (r *NotesListPostgres) Create(userId int, list model.NotesList) (int, error
 	var listId int
 	createListQuery := fmt.Sprintf(
 		`INSERT INTO %s (title, description) VALUES ($1, $2) RETURNING id`,
-		noteItemsTable,
+		noteListTable,
 	)
 	row := transaction.QueryRow(createListQuery, list.Title, list.Description)
 	if err := row.Scan(&listId); err != nil {
@@ -35,7 +35,7 @@ func (r *NotesListPostgres) Create(userId int, list model.NotesList) (int, error
 
 	createUsersListQuery := fmt.Sprintf(
 		`INSERT INTO %s (user_id, list_id) VALUES ($1, $2)`,
-		listsItemsTable,
+		usersListTable,
 	)
 	_, err = transaction.Exec(createUsersListQuery, userId, listId)
 	if err != nil {
