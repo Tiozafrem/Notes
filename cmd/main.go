@@ -7,6 +7,8 @@ import (
 	"notes/pkg/repository/postgres"
 	"notes/pkg/usecases"
 	"os"
+	"os/signal"
+	"syscall"
 
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -55,8 +57,20 @@ func main() {
 	srv := new(notes.Server)
 	srv.Run(viper.GetString("port"), handlers.InitRoutes())
 
-	quit := make(chan int, 1)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
+
+	logrus.Print("Shutting Down")
+
+	if err := srv.Shutdown(); err != nil {
+		logrus.Errorf("error occured on server shutting down: %s", err.Error())
+	}
+
+	if err := db.Close(); err != nil {
+		logrus.Errorf("error occured on db connection close: %s", err.Error())
+	}
+
 }
 
 // Init config from defaults pass
