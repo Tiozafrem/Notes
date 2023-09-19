@@ -401,4 +401,3 @@ ALTER TABLE ONLY public.users_lists
 --
 -- PostgreSQL database dump complete
 --
-
