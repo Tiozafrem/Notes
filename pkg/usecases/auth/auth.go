@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
+	"math/big"
 	"notes/model"
 	"notes/pkg/repository"
 	"time"
@@ -37,14 +38,31 @@ func NewAuthUsecases(repository repository.Authorization) *AuthUsecases {
 	return &AuthUsecases{repository: repository}
 }
 
-func generatePasswordHas(password string) string {
+func generatePasswordHash(password, salt string) string {
 	hash := sha1.New()
 	hash.Write([]byte(password))
 	return fmt.Sprintf("%x", hash.Sum([]byte(salt)))
 }
 
+func generatePasswordSalt() string {
+	number, err := rand.Int(rand.Reader, big.NewInt(8))
+	if err != nil {
+		return ""
+	}
+	length := number.Int64() + 18
+	buff := make([]byte, length)
+	_, err = rand.Read(buff)
+	if err != nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%x", buff)[:length]
+}
+
 func (u *AuthUsecases) CreateUser(user model.User) (int, error) {
-	user.Password = generatePasswordHas(user.Password)
+	user.Salt = generatePasswordSalt()
+	user.Password = generatePasswordHash(user.Password, user.Salt)
+
 	return u.repository.CreateUser(user)
 }
 
@@ -61,15 +79,16 @@ func (u *AuthUsecases) NewAccessToken(deviceId int) (string, error) {
 }
 
 func (u *AuthUsecases) GenerateToken(username, password, nameDevice string) (Tokens, error) {
-	user, err := u.repository.GetUser(username, generatePasswordHas(password))
-	if user.Id == 0 {
-		return Tokens{}, errors.New("no valid username or password")
-	}
+	var tokens Tokens
 
+	user, err := u.repository.GetUser(username)
 	if err != nil {
 		return Tokens{}, err
 	}
-	var tokens Tokens
+
+	if user.Password != generatePasswordHash(password, user.Salt) {
+		return Tokens{}, errors.New("password or login incoret")
+	}
 
 	tokens.RefreshToken, err = u.NewRefreshToken()
 	if err != nil {

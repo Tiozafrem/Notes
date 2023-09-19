@@ -19,7 +19,7 @@ import (
 // @version 1.0
 // @description Api server for Notes Application
 
-// @host localhost:80
+// @host localhost:8080
 // @BasePath /
 
 // @securityDefinitions.apikey ApiKeyAuth
@@ -55,6 +55,8 @@ func main() {
 	srv := new(notes.Server)
 	srv.Run(viper.GetString("port"), handlers.InitRoutes())
 
+	quit := make(chan int, 1)
+	<-quit
 }
 
 // Init config from defaults pass
