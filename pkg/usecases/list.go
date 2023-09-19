@@ -22,7 +22,7 @@ func (u *NotesListUsecases) GetAllList(userId int) ([]model.NotesList, error) {
 func (u *NotesListUsecases) GetListById(userId, listId int) (model.NotesList, error) {
 	return u.repository.GetListById(userId, listId)
 }
-func (u *NotesListUsecases) Update(userId, listId int, list model.UpdateListInput) error {
+func (u *NotesListUsecases) Update(userId, listId int, list model.ListInput) error {
 	if err := list.Validate(); err != nil {
 		return err
 	}

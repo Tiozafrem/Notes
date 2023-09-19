@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.4 (Ubuntu 13.4-1.pgdg20.04+1)
--- Dumped by pg_dump version 13.4 (Ubuntu 13.4-1.pgdg20.04+1)
+-- Dumped from database version 15.2
+-- Dumped by pg_dump version 15.2
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -19,6 +19,44 @@ SET row_security = off;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: devices_users; Type: TABLE; Schema: public; Owner: notes
+--
+
+CREATE TABLE public.devices_users (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    user_id integer NOT NULL,
+    description character varying(255),
+    refresh_token character varying(46) NOT NULL,
+    expire timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.devices_users OWNER TO notes;
+
+--
+-- Name: devices_users_id_seq; Type: SEQUENCE; Schema: public; Owner: notes
+--
+
+CREATE SEQUENCE public.devices_users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.devices_users_id_seq OWNER TO notes;
+
+--
+-- Name: devices_users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: notes
+--
+
+ALTER SEQUENCE public.devices_users_id_seq OWNED BY public.devices_users.id;
+
 
 --
 -- Name: items; Type: TABLE; Schema: public; Owner: notes
@@ -199,6 +237,13 @@ ALTER SEQUENCE public.users_lists_id_seq OWNED BY public.users_lists.id;
 
 
 --
+-- Name: devices_users id; Type: DEFAULT; Schema: public; Owner: notes
+--
+
+ALTER TABLE ONLY public.devices_users ALTER COLUMN id SET DEFAULT nextval('public.devices_users_id_seq'::regclass);
+
+
+--
 -- Name: items id; Type: DEFAULT; Schema: public; Owner: notes
 --
 
@@ -234,43 +279,75 @@ ALTER TABLE ONLY public.users_lists ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
--- Name: items items_id_key; Type: CONSTRAINT; Schema: public; Owner: notes
+-- Name: devices_users devices_users_pkey; Type: CONSTRAINT; Schema: public; Owner: notes
+--
+
+ALTER TABLE ONLY public.devices_users
+    ADD CONSTRAINT devices_users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: devices_users devices_users_unique_name; Type: CONSTRAINT; Schema: public; Owner: notes
+--
+
+ALTER TABLE ONLY public.devices_users
+    ADD CONSTRAINT devices_users_unique_name UNIQUE (user_id, name);
+
+
+--
+-- Name: items items_pkey; Type: CONSTRAINT; Schema: public; Owner: notes
 --
 
 ALTER TABLE ONLY public.items
-    ADD CONSTRAINT items_id_key UNIQUE (id);
+    ADD CONSTRAINT items_pkey PRIMARY KEY (id);
 
 
 --
--- Name: lists lists_id_key; Type: CONSTRAINT; Schema: public; Owner: notes
---
-
-ALTER TABLE ONLY public.lists
-    ADD CONSTRAINT lists_id_key UNIQUE (id);
-
-
---
--- Name: lists_items lists_items_id_key; Type: CONSTRAINT; Schema: public; Owner: notes
+-- Name: lists_items lists_items_keys; Type: CONSTRAINT; Schema: public; Owner: notes
 --
 
 ALTER TABLE ONLY public.lists_items
-    ADD CONSTRAINT lists_items_id_key UNIQUE (id);
+    ADD CONSTRAINT lists_items_keys UNIQUE (item_id, list_id);
 
 
 --
--- Name: users users_id_key; Type: CONSTRAINT; Schema: public; Owner: notes
+-- Name: lists_items lists_items_pkey; Type: CONSTRAINT; Schema: public; Owner: notes
 --
 
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_id_key UNIQUE (id);
+ALTER TABLE ONLY public.lists_items
+    ADD CONSTRAINT lists_items_pkey PRIMARY KEY (id);
 
 
 --
--- Name: users_lists users_lists_id_key; Type: CONSTRAINT; Schema: public; Owner: notes
+-- Name: lists lists_pkey; Type: CONSTRAINT; Schema: public; Owner: notes
+--
+
+ALTER TABLE ONLY public.lists
+    ADD CONSTRAINT lists_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users_lists users_lists_keys; Type: CONSTRAINT; Schema: public; Owner: notes
 --
 
 ALTER TABLE ONLY public.users_lists
-    ADD CONSTRAINT users_lists_id_key UNIQUE (id);
+    ADD CONSTRAINT users_lists_keys UNIQUE (user_id, list_id);
+
+
+--
+-- Name: users_lists users_lists_pkey; Type: CONSTRAINT; Schema: public; Owner: notes
+--
+
+ALTER TABLE ONLY public.users_lists
+    ADD CONSTRAINT users_lists_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: notes
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
 
 --
@@ -279,6 +356,14 @@ ALTER TABLE ONLY public.users_lists
 
 ALTER TABLE ONLY public.users
     ADD CONSTRAINT users_username_key UNIQUE (username);
+
+
+--
+-- Name: devices_users divece_users_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: notes
+--
+
+ALTER TABLE ONLY public.devices_users
+    ADD CONSTRAINT divece_users_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --

@@ -33,7 +33,7 @@ func (u *NotesItemUsecases) GetItemById(userId, itemId int) (model.NoteItem, err
 func (u *NotesItemUsecases) Delete(userId, itemId int) error {
 	return u.repository.Delete(userId, itemId)
 }
-func (u *NotesItemUsecases) Update(userId, itemId int, item model.UpdateItemInput) error {
+func (u *NotesItemUsecases) Update(userId, itemId int, item model.ItemInput) error {
 	if err := item.Validate(); err != nil {
 		return err
 	}

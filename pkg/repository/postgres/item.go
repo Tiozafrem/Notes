@@ -94,7 +94,7 @@ func (r *NotesItemPostgres) Delete(userId, itemId int) error {
 	return err
 }
 
-func (r *NotesItemPostgres) Update(userId, itemId int, item model.UpdateItemInput) error {
+func (r *NotesItemPostgres) Update(userId, itemId int, item model.ItemInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)
 	argId := 1

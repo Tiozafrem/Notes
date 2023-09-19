@@ -12,6 +12,7 @@ const (
 	usersListTable  = "users_lists"
 	noteItemsTable  = "items"
 	listsItemsTable = "lists_items"
+	deviceUserTable = "devices_users"
 )
 
 type Config struct {

@@ -11,14 +11,14 @@ type NoteItem struct {
 }
 
 // Update item in notes model
-type UpdateItemInput struct {
+type ItemInput struct {
 	Title       *string `json:"title"`
 	Description *string `json:"description"`
 	Done        *bool   `json:"done"`
 }
 
 // Check update item for not null all value
-func (item UpdateItemInput) Validate() error {
+func (item ItemInput) Validate() error {
 	if item.Title == nil && item.Description == nil && item.Done == nil {
 		return errors.New("update structure has no values")
 	}
