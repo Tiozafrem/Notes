@@ -23,6 +23,7 @@ type NoteList interface {
 	GetListById(userId, listId int) (model.NotesList, error)
 	Update(userId, listId int, list model.ListInput) error
 	Delete(userId, listId int) error
+	GetAllUserListByListId(listId int) ([]model.UserList, error)
 }
 
 type NoteItem interface {
@@ -31,6 +32,7 @@ type NoteItem interface {
 	GetItemById(userId, itemId int) (model.NoteItem, error)
 	Delete(userId, itemId int) error
 	Update(userId, itemId int, item model.ItemInput) error
+	GetAllUserListByItemId(itemId int) ([]model.UserList, error)
 }
 
 type Repository struct {

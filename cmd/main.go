@@ -3,6 +3,7 @@ package main
 import (
 	"notes"
 	"notes/pkg/handler"
+	"notes/pkg/hub"
 	"notes/pkg/repository"
 	"notes/pkg/repository/postgres"
 	"notes/pkg/usecases"
@@ -52,8 +53,9 @@ func main() {
 	}
 
 	repository := repository.NewRepository(db)
-	usecases := usecases.NewUsecases(repository)
-	handlers := handler.NewHandler(usecases)
+	hub := hub.NewHub()
+	usecases := usecases.NewUsecases(repository, hub)
+	handlers := handler.NewHandler(usecases, hub)
 	srv := new(notes.Server)
 	srv.Run(viper.GetString("port"), handlers.InitRoutes())
 

@@ -133,3 +133,20 @@ func (r *NotesItemPostgres) Update(userId, itemId int, item model.ItemInput) err
 	_, err := r.db.Exec(query, args...)
 	return err
 }
+
+func (r *NotesItemPostgres) GetAllUserListByItemId(itemId int) ([]model.UserList, error) {
+	var item []model.UserList
+	query := fmt.Sprintf(
+		`SELECT list_user_table.id, list_user_table.user_id, list_user_table.list_id 
+		FROM %s item_table
+		INNER JOIN %s list_item_table ON
+			item_table.id = list_item_table.item_id
+		INNER JOIN %s list_user_table ON
+			list_item_table.list_id = list_user_table.list_id
+		WHERE item_table.id = $1 `,
+		noteItemsTable, listsItemsTable, usersListTable)
+	if err := r.db.Select(&item, query, itemId); err != nil {
+		return item, err
+	}
+	return item, nil
+}

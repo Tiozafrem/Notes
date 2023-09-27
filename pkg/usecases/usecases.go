@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"notes/model"
+	"notes/pkg/hub"
 	"notes/pkg/repository"
 	"notes/pkg/usecases/auth"
 )
@@ -37,10 +38,10 @@ type Usecases struct {
 	NoteItem
 }
 
-func NewUsecases(repositorys *repository.Repository) *Usecases {
+func NewUsecases(repositorys *repository.Repository, hub hub.HubNotify) *Usecases {
 	return &Usecases{
 		Authorization: auth.NewAuthUsecases(repositorys.Authorization),
-		NoteList:      NewNotesListUsecases(repositorys.NoteList),
-		NoteItem:      NewNotesItemUsecases(repositorys.NoteItem, repositorys.NoteList),
+		NoteList:      NewNotesListUsecases(repositorys.NoteList, hub),
+		NoteItem:      NewNotesItemUsecases(repositorys.NoteItem, repositorys.NoteList, hub),
 	}
 }

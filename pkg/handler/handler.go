@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"notes/pkg/hub"
 	"notes/pkg/usecases"
 
 	"github.com/gin-gonic/gin"
@@ -12,11 +13,15 @@ import (
 )
 
 type Handler struct {
-	usecases *usecases.Usecases
+	usecases  *usecases.Usecases
+	hubNotify hub.HubNotify
 }
 
-func NewHandler(usecases *usecases.Usecases) *Handler {
-	return &Handler{usecases: usecases}
+func NewHandler(usecases *usecases.Usecases, hub hub.HubNotify) *Handler {
+	return &Handler{
+		usecases:  usecases,
+		hubNotify: hub,
+	}
 }
 
 // Add routes for app
@@ -56,6 +61,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			items.PUT("/:id", h.updateItem)
 			items.DELETE("/:id", h.deleteItem)
 		}
+
+		api.GET("/ws", h.websocket)
 
 	}
 

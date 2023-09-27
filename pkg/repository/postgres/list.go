@@ -118,3 +118,19 @@ func (r *NotesListPostgres) Delete(userId, listId int) error {
 	_, err := r.db.Exec(query, userId, listId)
 	return err
 }
+
+func (r *NotesListPostgres) GetAllUserListByListId(listId int) ([]model.UserList, error) {
+	var items []model.UserList
+	query := fmt.Sprintf(
+		`
+		SELECT list_user_table.id, list_user_table.user_id, list_user_table.list_id 
+		FROM %s list_user_table
+		WHERE list_user_table.list_id = $1
+		`,
+		usersListTable)
+
+	if err := r.db.Select(&items, query, listId); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
